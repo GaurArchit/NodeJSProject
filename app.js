@@ -2,12 +2,19 @@ import express from "express";
 import { fileURLToPath } from "url";
 import { join, dirname } from "path";
 import morgan from "morgan";
+import protectRoute from "./utils/protechRoute.js";
 import session from "express-session";
+import compression from "compression";
+
 const app = express();
 const __dirname = dirname(fileURLToPath(import.meta.url));
 app.use(express.json()); //This is for palindrom post request where we are sending data in format of JSON
+
 //Adding Morgan logs
 app.use(morgan("dev"));
+
+//Using Compression middle ware
+app.use(compression());
 
 //Middleware and parsing the value
 app.use(express.urlencoded({ extended: false }));
@@ -40,34 +47,34 @@ app.get("/", (req, res) => {
 //----------------------------------------------------------------------------
 //HANDLING POST REQREST
 
-// Route handler for POST requests to "/palindrome"
-app.post("/palindrome", (req, res) => {
-  // Check if the request body contains a "word" field
-  if (!req.body || !req.body.word) {
-    // If no word is supplied, send an error response
-    return res.status(400).send({
-      error: "No word supplied",
-    });
-  }
+// // Route handler for POST requests to "/palindrome"
+// app.post("/palindrome", (req, res) => {
+//   // Check if the request body contains a "word" field
+//   if (!req.body || !req.body.word) {
+//     // If no word is supplied, send an error response
+//     return res.status(400).send({
+//       error: "No word supplied",
+//     });
+//   }
 
-  // Extract the word from the request body
-  const word = req.body.word;
-  console.log(req.body);
+//   // Extract the word from the request body
+//   const word = req.body.word;
+//   console.log(req.body);
 
-  // Check if the word is a palindrome
-  const isPalindrome = checkPalindrome(word);
+//   // Check if the word is a palindrome
+//   const isPalindrome = checkPalindrome(word);
 
-  // Send response based on whether the word is a palindrome or not
-  if (isPalindrome) {
-    res.send({
-      message: `${word} is a palindrome`,
-    });
-  } else {
-    res.send({
-      message: `${word} is not a palindrome`,
-    });
-  }
-});
+//   // Send response based on whether the word is a palindrome or not
+//   if (isPalindrome) {
+//     res.send({
+//       message: `${word} is a palindrome`,
+//     });
+//   } else {
+//     res.send({
+//       message: `${word} is not a palindrome`,
+//     });
+//   }
+// });
 
 // Function to check if a word is a palindrome
 function checkPalindrome(word) {
@@ -106,7 +113,8 @@ app.get("/admin", (req, res) => {
     : res.redirect("/admin/login");
 });
 
-app.get("/admin/dashboard", (req, res) => {
+app.get("/admin/dashboard", protectRoute("/admin/login"), (req, res) => {
+  // Adding custome middle to app.get as itself it is a middle ware
   res.render("dashboard", {
     user: req.session.user,
     posts: [
