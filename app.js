@@ -50,10 +50,12 @@ function checkPalindrome(word) {
 }
 //------------------------------------------------------------------------------------------------------------------------
 //Handling Static HTML Pages
+app.set("view engine", "pug");
 app.use("/public", express.static(join(__dirname, "public")));
 app
   .get("/admin/login", (req, res) => {
-    res.sendFile(join(__dirname, "views", "login.html"));
+    // res.sendFile(join(__dirname, "views", "login.html"));
+    res.render("login");
   })
   .post("/admin/login", (req, res) => {
     res.send("handle login here..... "); //Because we have sent data from Post that y message is coming
