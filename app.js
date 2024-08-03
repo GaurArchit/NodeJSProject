@@ -8,7 +8,10 @@ import compression from "compression";
 import home from "./routes/home/index.js";
 import admin from "./routes/admin/index.js";
 import api from "./routes/api/index.js";
-//req.session is an object that represents the session associated with the current request.
+import mongoose from "mongoose";
+import dotenv from "dotenv";
+
+dotenv.config();
 const app = express();
 const __dirname = dirname(fileURLToPath(import.meta.url));
 app.use(express.json()); //This is for palindrom post request where we are sending data in format of JSON
@@ -18,6 +21,22 @@ app.use(morgan("dev"));
 
 //Using Compression middle ware
 app.use(compression());
+
+const dbURI = process.env.monurl;
+console.log(dbURI);
+mongoose
+  .connect(dbURI, {
+    useNewUrlParser: true,
+    useUnifiedTopology: true,
+  })
+  .then(() => {
+    console.log("Connected to MongoDB");
+  })
+  .catch((error) => {
+    console.error("Error connecting to MongoDB:", error);
+  });
+
+//req.session is an object that represents the session associated with the current request.
 
 //Middleware and parsing the value
 app.use(express.urlencoded({ extended: false }));
@@ -150,5 +169,4 @@ app.use("/public", express.static(join(__dirname, "public")));
 app.use("/", home);
 app.use("/admin", admin);
 app.use("/api", api);
-
 app.listen(5030, () => console.log("Server is Working "));
