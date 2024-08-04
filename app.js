@@ -10,6 +10,8 @@ import admin from "./routes/admin/index.js";
 import api from "./routes/api/index.js";
 import mongoose from "mongoose";
 import dotenv from "dotenv";
+import { Schema, model } from "mongoose";
+import { ObjectId } from Schema.Types;
 
 dotenv.config();
 const app = express();
@@ -21,7 +23,7 @@ app.use(morgan("dev"));
 
 //Using Compression middle ware
 app.use(compression());
-
+//This Line is code is Written to connect to DataBase
 const dbURI = process.env.monurl;
 console.log(dbURI);
 mongoose
@@ -35,6 +37,63 @@ mongoose
   .catch((error) => {
     console.error("Error connecting to MongoDB:", error);
   });
+//// Till here
+//Schema in mongo DB we can make it all seprately but I am making all in one
+
+const userSchema = new Schema({
+  name: {
+    type: String,
+    required: true,
+  },
+  email: {
+    type: String,
+    unique: true,
+    required: true,
+  },
+  password: {
+    type: String,
+    required: true,
+  },
+  createdAt: { type: Date, default: Date.now },
+  lastLoggedIn: { type: Date, default: Date.now },
+  isAdmin: {
+    type: Boolean,
+    default: false,
+  },
+});
+const User = model("User", userSchema);
+app.get("/500", (req, res) => {
+  const users = User.create({
+    name: "ArchitGaur",
+    email: "sandy@gmail.com",
+    password: "dssdssds",
+  });
+  res.send(users);
+  console.log("Table created", users);
+});
+//Post Schema and Model 
+const PostSchema =new Schema({
+  title:{
+    type:String,
+    required:true,
+  },
+  content:{
+    type:String,
+    required:true,
+  }
+  ,
+ user: {
+type:ObjectId,
+ref:"User",
+required:true,
+  }
+  ,createdAt: { type: Date, default: Date.now },
+  isAdmin: {
+    type: Boolean,
+    default: true,
+  },
+});
+const Post =model("PostSchema",PostSchema);
 
 //req.session is an object that represents the session associated with the current request.
 
